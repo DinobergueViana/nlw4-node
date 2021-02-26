@@ -1,4 +1,5 @@
 import request from "supertest";
+import { getConnection } from "typeorm";
 import { app } from "../app";
 import createConnection from '../database';
 
@@ -8,7 +9,14 @@ describe("Survey", () => {
   beforeAll( async () => {
     const connection = await createConnection();
     await connection.runMigrations();
-  })
+  });
+
+  // dropando o database após os testes serem finalizados
+  afterAll(async () => {
+    const connection = getConnection();
+    await connection.dropDatabase();
+    await connection.close()
+  });
 
   // teste: criar um survey
   it("Should be able to create a new survey", async () => {
@@ -32,7 +40,7 @@ describe("Survey", () => {
 
     const response = await request(app).get("/surveys");
 
-    expect(response.body.length).toBe(2);
+    expect(response.status).toBe(200);
   })
 
 });
